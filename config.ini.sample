@@ -1,0 +1,4 @@
+AWS_ACCESS_KEY=AKIA...
+AWS_SECRET=
+AWS_BUCKET=your-bucket-name
+AWS_REGION=us-east-1
