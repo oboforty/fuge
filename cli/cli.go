@@ -24,7 +24,7 @@ func ExecuteCLI() {
 	case "upload":
 		fmt.Println("Uploading file to Fuge Services...")
 
-		if err := store.UploadToS3(objectKey, fileName); err != nil {
+		if err := store.UploadToS3(objectKey, fileName, nil); err != nil {
 			log.Fatalf("Upload failed: %v", err)
 		}
 

@@ -12,6 +12,7 @@ import (
 var inputText string
 var labelText string = "Write a file's name above and press `download`. To upload a file, type a file's name that you placed in the uploads/ folder."
 var inp nucular.TextEditor
+var uldlProgress int = 0
 
 func InitializeUI() {
 	inp = nucular.TextEditor{
@@ -22,7 +23,7 @@ func InitializeUI() {
 	wnd := nucular.NewMasterWindowSize(
 		0,
 		"Fuge",
-		image.Point{400, 250}, updatefn,
+		image.Point{400, 280}, updatefn,
 	)
 	wnd.SetStyle(style.FromTheme(style.DarkTheme, 1.0))
 	wnd.Main()
@@ -45,37 +46,56 @@ func updatefn(w *nucular.Window) {
 
 	// w.Row(30).Static(380)
 	// w.Label(labelText, "LC")
+
+	w.Row(32).Static(350)
+	w.Progress(&uldlProgress, 100, false)
+
 	w.Row(120).Static(350)
 	w.LabelWrap(labelText)
 
 	w.Row(30).Static(100, 100)
 	if w.ButtonText("Download") {
 		fileName := string(inp.Buffer)
-		objectKey := "addclan/" + fileName
 
 		labelText = fmt.Sprintf("Downloading %s from Store...", fileName)
 
 		inp.Delete(0, len(fileName))
 
-		if err := store.DownloadFromS3(objectKey, fileName); err != nil {
-			labelText = fmt.Sprintf("ERROR: Download failed: %v", err)
-		} else {
-			labelText = fmt.Sprintf("Download complete! %s", "uploads/"+fileName)
-		}
+		go download("addclan/"+fileName, fileName)
 	}
 
 	if w.ButtonText("Upload") {
 		fileName := string(inp.Buffer)
-		objectKey := "addclan/" + fileName
 
 		labelText = fmt.Sprintf("Uploading file %s to Fuge Services...", fileName)
 
 		inp.Delete(0, len(fileName))
 
-		if err := store.UploadToS3(objectKey, fileName); err != nil {
-			labelText = fmt.Sprintf("ERROR: Upload failed: %v", err)
-		} else {
-			labelText = fmt.Sprintf("Upload successful! %s", "downloads/"+fileName)
-		}
+		go upload("addclan/"+fileName, fileName)
+	}
+}
+
+func uploadProgress(p int) {
+	uldlProgress = p
+}
+
+func download(objectKey, fileName string) {
+	uldlProgress = 0
+
+	if err := store.DownloadFromS3(objectKey, fileName); err != nil {
+		labelText = fmt.Sprintf("ERROR: Download failed: %v", err)
+	} else {
+		labelText = fmt.Sprintf("Download complete! %s", "uploads/"+fileName)
+	}
+}
+
+func upload(objectKey, fileName string) {
+	uldlProgress = 0
+
+	if err := store.UploadToS3(objectKey, fileName, uploadProgress); err != nil {
+		labelText = fmt.Sprintf("ERROR: Upload failed: %v", err)
+
+	} else {
+		labelText = fmt.Sprintf("Upload successful! %s", "downloads/"+fileName)
 	}
 }
