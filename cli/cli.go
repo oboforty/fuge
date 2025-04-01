@@ -28,7 +28,7 @@ func ExecuteCLI() {
 			log.Fatalf("Upload failed: %v", err)
 		}
 
-		fmt.Printf("Upload successful! %s", "downloads/"+fileName)
+		fmt.Printf("Upload successful! from %s", "uploads/"+fileName)
 	case "download":
 		fmt.Println("Downloading from Store...")
 
@@ -36,7 +36,13 @@ func ExecuteCLI() {
 			log.Fatalf("Download failed: %v", err)
 		}
 
-		fmt.Printf("Download complete! %s", "uploads/"+fileName)
+		fmt.Printf("Download complete! %s", "downloads/"+fileName)
+	case "patch":
+		fmt.Println("Patching...")
+		if err := store.Patch(); err != nil {
+			log.Fatalf("Patch failed: %v", err)
+		}
+		fmt.Println("Patch completed!")
 	default:
 		fmt.Println("Invalid action. Use 'upload' or 'download'")
 		os.Exit(1)

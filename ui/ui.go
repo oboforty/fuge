@@ -61,7 +61,12 @@ func updatefn(w *nucular.Window) {
 
 		inp.Delete(0, len(fileName))
 
-		go download("addclan/"+fileName, fileName)
+		if fileName == "patch" {
+			// reserved keyword, self patch
+			go patch()
+		} else {
+			go download("addclan/"+fileName, fileName)
+		}
 	}
 
 	if w.ButtonText("Upload") {
@@ -70,7 +75,6 @@ func updatefn(w *nucular.Window) {
 		labelText = fmt.Sprintf("Uploading file %s to Fuge Services...", fileName)
 
 		inp.Delete(0, len(fileName))
-
 		go upload("addclan/"+fileName, fileName)
 	}
 }
@@ -97,5 +101,13 @@ func upload(objectKey, fileName string) {
 
 	} else {
 		labelText = fmt.Sprintf("Upload successful! %s", "downloads/"+fileName)
+	}
+}
+
+func patch() {
+	if err := store.Patch(); err != nil {
+		labelText = fmt.Sprintf("ERROR: Patch failed: %v", err)
+	} else {
+		labelText = fmt.Sprintf("Patch OK at %s", "see in downloads/ folder")
 	}
 }
